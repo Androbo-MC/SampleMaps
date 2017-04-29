@@ -1,7 +1,9 @@
 package com.example.sample.samplemaps;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -26,7 +28,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
     private ArrayList<String> latList = new ArrayList<>();
     private ArrayList<String> lngList = new ArrayList<>();
     private List<EditText> textBoxList = new ArrayList<>();
-    private List<String> textList = new ArrayList<>();
+    private ArrayList<String> inputStationList = new ArrayList<>();
     private int counter = 0;
     private ProgressDialog dialog = null;
 
@@ -52,10 +54,13 @@ public class MainActivity extends Activity implements View.OnClickListener {
         // 文字列のリストに詰める
         for (EditText text : textBoxList) {
 
-            textList.add(text.getText().toString());
+            if (!text.getText().toString().isEmpty()) {
+
+                inputStationList.add(text.getText().toString());
+            }
         }
         // テキストが入力されていた数だけリクエストを投げる
-        for (String text : textList) {
+        for (String text : inputStationList) {
             if (null != text && !text.isEmpty()) {
 
                 counter++;
@@ -64,6 +69,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
         }
     }
 
+    // 指定された駅の数だけリクエスト投げて場所を特定
     private void getPlaceInfo(final String searchText) {
 
         // 1つめのリクエストを投げる時にくるくるを表示
@@ -114,6 +120,21 @@ public class MainActivity extends Activity implements View.OnClickListener {
                 } catch(JSONException e) {
 
                     e.printStackTrace();
+                    dialog.dismiss();
+
+                    new AlertDialog.Builder(MainActivity.this)
+                            .setTitle("検索結果取得が取得できません。")
+                            .setMessage("入力をやり直して下さい。")
+                            .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+
+                                    // ほんとは終了じゃなくて再描画的にしたい
+                                    finish();
+                                }
+                            })
+                            .setCancelable(false)
+                            .show();
                 }
 
                 // 全てのレスポンスが取得できたらMAPへ画面遷移
@@ -123,12 +144,12 @@ public class MainActivity extends Activity implements View.OnClickListener {
                     // 取得した緯度経度を渡す
                     intent.putStringArrayListExtra("latitude", latList);
                     intent.putStringArrayListExtra("longitude", lngList);
-                    intent.putExtra("counter", counter);
+                    intent.putStringArrayListExtra("inputStationList", inputStationList);
                     startActivity(intent);
                     // 各リストを初期化
                     latList.clear();
                     lngList.clear();
-                    textList.clear();
+                    inputStationList.clear();
                     textBoxList.clear();
                     counter = 0;
                     // くるくるを消去
@@ -140,10 +161,10 @@ public class MainActivity extends Activity implements View.OnClickListener {
 
     @Override
     public boolean dispatchKeyEvent(KeyEvent e) {
-        // バックボタンが押されたらアプリ終了
-        if (e.getAction() == KeyEvent.ACTION_UP && e.getKeyCode() == KeyEvent.KEYCODE_BACK) { //バックボタンが離された時
-
-            finish();   // でもこれで終了しないぽい
+        // バックボタンが離された時
+        if (e.getAction() == KeyEvent.ACTION_UP && e.getKeyCode() == KeyEvent.KEYCODE_BACK) {
+            // このアクティビティの終了(MAPへ戻る)
+//            finish(); //finishしなくても終わるぽい
         }
         return super.dispatchKeyEvent(e);
     }

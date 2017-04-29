@@ -1,10 +1,13 @@
 package com.example.sample.samplemaps;
 
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.widget.Toast;
 
@@ -16,7 +19,19 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.squareup.okhttp.OkHttpClient;
+import com.squareup.okhttp.Request;
+import com.squareup.okhttp.Response;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
+
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -27,8 +42,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private List<Double> latList = new ArrayList<>();
     private List<Double> lngList = new ArrayList<>();
     private List<LatLng> latLngList = new ArrayList<>();
-    private int counter = 0;
+    private List<String> inputStationList = new ArrayList<>();
+    private List<String> resultStationList = new ArrayList<>();
+    private ArrayList<SearchResultModel> resultModelList = new ArrayList<>();
     private LatLng centerLatLng = null;
+    private ProgressDialog dialog = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,10 +61,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         // 起動時にMainActivityから表示させるための遷移
         // (なぜか向こうをデフォルトにすると落ちる)
-        if (null == intent.getExtras()) {
+        if (null == intent.getStringArrayListExtra("latitude")
+                || null == intent.getStringArrayListExtra("longitude")) {
 
             intent = new Intent(this, MainActivity.class);
-            startActivity(intent);
+            startActivityForResult(intent, 1);
         } else {
 
             // Mainから遷移してきたら緯度経度のリストをStringからDoubleに戻す
@@ -54,13 +73,22 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             for (String lat : stringLatList) {
 
                 latList.add(Double.parseDouble(lat));
-        }
+            }
             List<String> stringLngList = intent.getStringArrayListExtra("longitude");
             for (String lng : stringLngList) {
 
                 lngList.add(Double.parseDouble(lng));
             }
-            counter = intent.getIntExtra("counter", 0);
+            inputStationList = intent.getStringArrayListExtra(("inputStationList"));
+
+        }
+    }
+
+    public void onActivityResult( int requestCode, int resultCode, Intent intent ) {
+        // メイン画面からバックボタンで戻ってきた時はアプリ終了
+        if (requestCode == 1) {
+
+            this.finish();
         }
     }
 
@@ -89,7 +117,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         if (!latList.isEmpty() && !lngList.isEmpty()) {
 
-            for (int i = 0; i < counter; i++) {
+            for (int i = 0; i < latList.size(); i++) {
                 // 取得した座標の数だけピンをセットする
                 latLngList.add(new LatLng(latList.get(i), lngList.get(i)));
                 mMap.addMarker(new MarkerOptions().position(latLngList.get(i)));
@@ -101,14 +129,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     maxDistanceLat = lat;
                 }
             }
-            aveLat = sumLat / counter;
+            aveLat = sumLat / latList.size();
             for (double lng : lngList) {
                 sumLng += lng;
                 if (maxDistanceLng < lng) {
                     maxDistanceLng = lng;
                 }
             }
-            aveLng = sumLng / counter;
+            aveLng = sumLng / lngList.size();
             centerLatLng = new LatLng(aveLat, aveLng);
             // 中間地点に色違いのピンをセットして情報ウインドウも表示
             Marker centerMarker = mMap.addMarker(new MarkerOptions().position(centerLatLng)
@@ -130,7 +158,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             latList.clear();
             lngList.clear();
             latLngList.clear();
-            counter = 0;
             centerLatLng = null;
         }
         return super.dispatchKeyEvent(e);
@@ -141,13 +168,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         // 情報ウインドウがタップされた時の処理
         new AlertDialog.Builder(this)
                 .setTitle("周辺施設検索")
-                .setMessage("この地点の周辺施設を表示しますか？")
+                .setMessage("この地点の周辺駅情報を表示しますか？")
                 .setPositiveButton("OK", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
 
-                                Toast.makeText(MapsActivity.this, "作成中",
-                                        Toast.LENGTH_SHORT).show();
+                        getStationInfo(centerLatLng);
                     }
                 })
                 .setNegativeButton("キャンセル", new DialogInterface.OnClickListener() {
@@ -157,5 +183,152 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     }
                 })
                 .show();
+    }
+
+    // 中間地点から近い駅の情報を取得
+    private void getStationInfo(final LatLng centerLatLng) {
+
+        // リクエストを投げる時にくるくるを表示
+        dialog = new ProgressDialog(MapsActivity.this);
+        dialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+        dialog.setMessage("検索中");
+        dialog.show();
+
+        new AsyncTask<Void, Void, String>() {          //登録処理は非同期で
+            @Override
+            protected String doInBackground(Void... params) {
+
+                String result = null;
+
+                try {
+                    Request request = new Request.Builder()
+                            .url("https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=" +
+                                    String.valueOf(centerLatLng.latitude) + "," +
+                                    String.valueOf(centerLatLng.longitude) +
+                                    "&rankby=distance&type=train_station&language=ja&key=AIzaSyCnmpmaLnH9WQxkxDqF1NtDHwlkfr1ocqM")
+                            .get()
+                            .build();
+
+                    OkHttpClient client = new OkHttpClient();
+
+                    Response response = client.newCall(request).execute();
+                    result = response.body().string();
+
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                return result;
+            }
+
+            // 結果に応じた処理をUIスレッドで行う
+            @Override
+            protected void onPostExecute(String result) {
+
+
+
+                try {
+                    // 取得したJSONから必要な部分だけを抜き取る
+                    JSONArray jsonArray = new JSONObject(result).getJSONArray("results");
+                    for (int i = 0; i < jsonArray.length(); i++) {
+                        String station = jsonArray.getJSONObject(i).getString("name");
+                        // "○○駅"ではない検索結果を除外
+                        if (!station.substring(station.length()-1).equals("駅")) {
+                            continue;
+                        }
+                        // Jorudan検索のために"駅"を削除
+                        // → 駅付きでも検索できた(あとこれだとinputStationListの方は駅消せてないし)
+//                        station = station.substring(0, station.length()-1);
+                        // 中間地点に近い順の駅名をリストに詰める
+                        resultStationList.add(station);
+                        Log.d("debug", station);
+                        if (resultStationList.size() >= 10) {
+                            // とりあえず10駅までにしておく
+                            break;
+                        }
+                    }
+                } catch(JSONException e) {
+
+                    e.printStackTrace();
+                }
+
+                // 入力した駅と中間地点周辺駅の所要時間等を取得する
+                for (String inputStation : inputStationList) {
+
+                    for (String resultStation : resultStationList) {
+
+                        getStationDetail(inputStation, resultStation);
+                    }
+                }
+//                getStationDetail("新橋", "品川");
+            }
+        }.execute();
+    }
+
+    // 取得した駅名から詳細情報(所要時間等)を取得
+    private void getStationDetail(final String inputStation, final String resultStation) {
+
+        new AsyncTask<Void, Void, String>() {          //登録処理は非同期で
+            @Override
+            protected String doInBackground(Void... params) {
+
+                String result = null;
+
+                try {
+                    Request request = new Request.Builder()
+                            .url("http://www.jorudan.co.jp/norikae/route/"
+                                    + inputStation + "_" + resultStation + ".html")
+                            .get()
+                            .build();
+
+                    OkHttpClient client = new OkHttpClient();
+
+                    Response response = client.newCall(request).execute();
+                    result = response.body().string();
+
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                return result;
+            }
+
+            // 結果に応じた処理をUIスレッドで行う
+            @Override
+            protected void onPostExecute(String result) {
+
+                Log.d("debug", inputStation + resultStation);
+
+                SearchResultModel model = new SearchResultModel();
+                model.setStationNameFrom(inputStation);
+                model.setStationNameTo(resultStation);
+
+                // 入力駅 == 候補駅だった時は所要時間0分
+                if (inputStation.equals(resultStation)) {
+                    model.setFastestTime("0分");
+                } else {
+                    // 取得したwebページから必要な所要時間情報を取得
+                    Document doc = Jsoup.parse(result);
+/*                   Elements routeList = doc.getElementById("Bk_list_tbody").children();
+                    for (Element route : routeList) {
+                    Log.d("debug", route.child(2).text());
+                    }*/
+                    model.setFastestTime(doc.getElementById("Bk_list_tbody").child(0).child(2).text());
+                }
+
+                resultModelList.add(model);
+
+                Log.d("debug", resultModelList.get(resultModelList.size()-1).getStationNameFrom());
+                Log.d("debug", resultModelList.get(resultModelList.size()-1).getStationNameTo());
+                Log.d("debug", resultModelList.get(resultModelList.size()-1).getFastestTime());
+
+                // 全てのレスポンスが取得できたら画面遷移(これからやる)
+                if (inputStation.equals(inputStationList.get(inputStationList.size()-1))
+                        && resultStation.equals(resultStationList.get(resultStationList.size()-1))) {
+
+                    Log.d("debug", "最後");
+                    // くるくるを消去
+                    dialog.dismiss();
+                }
+            }
+        }.execute();
     }
 }
