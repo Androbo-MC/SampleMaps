@@ -78,6 +78,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
             dialog = new ProgressDialog(MainActivity.this);
             dialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
             dialog.setMessage("検索中");
+            dialog.setCancelable(false);
             dialog.show();
         }
         new AsyncTask<Void, Void, String>() {          //登録処理は非同期で
