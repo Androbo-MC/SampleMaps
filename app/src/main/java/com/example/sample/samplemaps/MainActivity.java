@@ -27,7 +27,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
 
     private ArrayList<String> latList = new ArrayList<>();
     private ArrayList<String> lngList = new ArrayList<>();
-    private List<EditText> textBoxList = new ArrayList<>();
+    private ArrayList<EditText> textBoxList = new ArrayList<>();
     private ArrayList<String> inputStationList = new ArrayList<>();
     private int counter = 0;
     private ProgressDialog dialog = null;

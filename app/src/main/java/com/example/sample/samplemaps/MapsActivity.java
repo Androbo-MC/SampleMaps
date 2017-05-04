@@ -9,7 +9,6 @@ import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.KeyEvent;
-import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -36,19 +35,19 @@ import java.util.List;
 import static com.example.sample.samplemaps.R.id.map;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback,
-        GoogleMap.OnInfoWindowClickListener, DialogInterface.OnCancelListener {
+        GoogleMap.OnInfoWindowClickListener {
 
-    private List<Double> latList = new ArrayList<>();
-    private List<Double> lngList = new ArrayList<>();
-    private List<LatLng> latLngList = new ArrayList<>();
-    private List<String> inputStationList = new ArrayList<>();
-    private List<String> resultStationList = new ArrayList<>();
-    private List<String> selectedStationList = new ArrayList<>();
+    private ArrayList<Double> latList = new ArrayList<>();
+    private ArrayList<Double> lngList = new ArrayList<>();
+    private ArrayList<LatLng> latLngList = new ArrayList<>();
+    private ArrayList<String> inputStationList = new ArrayList<>();
+    private ArrayList<String> resultStationList = new ArrayList<>();
+    private ArrayList<String> selectedStationList = new ArrayList<>();
     private ArrayList<SearchResultModel> resultModelList = new ArrayList<>();
+    private ArrayList<ArrayList<SearchResultModel>> resultList = new ArrayList<>();
     private LatLng centerLatLng = null;
     private ProgressDialog dialog = null;
     private int progressValue = 0;
-    private boolean requestCancelled = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -191,13 +190,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     @Override
     public boolean dispatchKeyEvent(KeyEvent e) {
-        // バックボタンが押されたら座標の各数値を初期化
+        // バックボタンが押された時
         if (e.getAction() == KeyEvent.ACTION_UP && e.getKeyCode() == KeyEvent.KEYCODE_BACK) { //バックボタンが離された時
-
-/*            latList.clear();
-            lngList.clear();
-            latLngList.clear();
-            centerLatLng = null;*/
         }
         return super.dispatchKeyEvent(e);
     }
@@ -329,17 +323,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                                 dialog.setMessage("しばらくお待ち下さい...");
                                 dialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
                                 dialog.setCancelable(false);
-//                                dialog.setOnCancelListener(MapsActivity.this);
                                 dialog.setMax(inputStationList.size() * selectedStationList.size());
                                 dialog.setProgress(progressValue);
                                 dialog.show();
-                                // 前のリクエストが途中でキャンセルされた時用
-                                requestCancelled = false;
-                                resultModelList.clear();
                                 // 入力した駅と中間地点周辺駅の所要時間等を取得する
-                                for (String inputStation : inputStationList) {
+                                for (String selectedStation : selectedStationList) {
 
-                                    for (String selectedStation : selectedStationList) {
+                                    for (String inputStation : inputStationList) {
 
                                         getStationDetail(inputStation, selectedStation);
                                     }
@@ -354,15 +344,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         // 再検索用にリストをクリア
         resultStationList.clear();
         selectedStationList.clear();
-    }
-
-    // プログレスバー画面がキャンセルされた時
-    @Override
-    public void onCancel(DialogInterface d) {
-
-        Log.d("debug", "onCancelled");
-        requestCancelled = true;
-        dialog.dismiss();
     }
 
     // 取得した駅名から詳細情報(所要時間等)を取得
@@ -398,44 +379,53 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             protected void onPostExecute(String result) {
 
                 Log.d("debug", inputStation + selectedStation);
-                // リクエストがキャンセルされた時は何もしない
-                // (でもこれだと前のリクエストが残っちゃうから、前のが終わるまで新たに送る分が実行されないぽい…)
-                if (!requestCancelled) {
 
-                    SearchResultModel model = new SearchResultModel();
-                    model.setStationNameFrom(inputStation);
-                    model.setStationNameTo(selectedStation);
+                SearchResultModel model = new SearchResultModel();
+                model.setStationNameFrom(inputStation);
+                model.setStationNameTo(selectedStation);
 
-                    // 入力駅 == 候補駅だった時は所要時間0分
-                    if (inputStation.equals(selectedStation)) {
-                        model.setFastestTime("0分");
-                    } else {
-                        // 取得したwebページから必要な所要時間情報を取得
-                        Document doc = Jsoup.parse(result);
+                // 入力駅 == 候補駅だった時は所要時間0分
+                if (inputStation.equals(selectedStation)) {
+                    model.setFastestTime("0分");
+                } else {
+                    // 取得したwebページから必要な所要時間情報を取得
+                    Document doc = Jsoup.parse(result);
 /*                   Elements routeList = doc.getElementById("Bk_list_tbody").children();
-                    for (Element route : routeList) {
-                    Log.d("debug", route.child(2).text());
-                    }*/
-                        model.setFastestTime(doc.getElementById("Bk_list_tbody").child(0).child(2).text());
-                    }
-                    resultModelList.add(model);
+                for (Element route : routeList) {
+                Log.d("debug", route.child(2).text());
+                }*/
+                    model.setFastestTime(doc.getElementById("Bk_list_tbody").child(0).child(2).text());
+                }
+                resultModelList.add(model);
 
-                    Log.d("debug", resultModelList.get(resultModelList.size()-1).getStationNameFrom());
-                    Log.d("debug", resultModelList.get(resultModelList.size()-1).getStationNameTo());
-                    Log.d("debug", resultModelList.get(resultModelList.size()-1).getFastestTime());
+                Log.d("debug", resultModelList.get(resultModelList.size()-1).getStationNameFrom());
+                Log.d("debug", resultModelList.get(resultModelList.size()-1).getStationNameTo());
+                Log.d("debug", resultModelList.get(resultModelList.size()-1).getFastestTime());
 
-                    // プログレスバーを進める
-                    progressValue++;
-                    dialog.setProgress(progressValue);
+                // プログレスバーを進める
+                progressValue++;
+                dialog.setProgress(progressValue);
 
-                    // 全てのレスポンスが取得できたら画面遷移(これからやる)
-                    if (inputStation.equals(inputStationList.get(inputStationList.size()-1))
-                            && selectedStation.equals(selectedStationList.get(selectedStationList.size()-1))) {
+                if (inputStation.equals(inputStationList.get(inputStationList.size()-1))) {
+                    // inputStationの区切りでいったん大元のリストに詰めてリセット
+                    resultList.add(resultModelList);
+                    resultModelList = new ArrayList<>();
+                }
+                // 全てのレスポンスが取得できたら画面遷移
+                if (inputStation.equals(inputStationList.get(inputStationList.size()-1))
+                        && selectedStation.equals(selectedStationList.get(selectedStationList.size()-1))) {
 
-                        Log.d("debug", "最後");
-                        // くるくるを消去
-                        dialog.dismiss();
-                    }
+                    Intent intent = new Intent(MapsActivity.this, DetailsActivity.class);
+                    intent.putExtra("result", resultList);
+                    startActivity(intent);
+
+                    Log.d("debug", "最後");
+                    // 各値の初期化
+                    resultList.clear();
+                    resultModelList.clear();
+                    progressValue = 0;
+                    // くるくるを消去
+                    dialog.dismiss();
                 }
             }
         }.execute();
