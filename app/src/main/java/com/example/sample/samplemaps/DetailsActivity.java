@@ -28,15 +28,12 @@ public class DetailsActivity extends Activity implements AdapterView.OnItemClick
         Intent intent = getIntent();
         ArrayList<ArrayList<SearchResultModel>> resultList =
                 (ArrayList<ArrayList<SearchResultModel>>)intent.getSerializableExtra("result");
-//        ArrayList<HashMap<String, String>> displayList = new ArrayList<>();
 
         Log.d("debug", "detail test");
 
         for (ArrayList<SearchResultModel> list : resultList) {
 
-//            HashMap<String, String> map = new HashMap<>();
             DisplayModel displayModel = new DisplayModel();
-//            map.put("title", list.get(0).getStationNameTo());
             displayModel.setTitle(list.get(0).getStationNameTo());
             double aveTime = 0;
             double aveTrans = 0;
@@ -64,20 +61,17 @@ public class DetailsActivity extends Activity implements AdapterView.OnItemClick
                     aveCost += Integer.parseInt(model.getCost().substring(0, model.getCost().length()-1));
                 }
             }
+            // 合計から平均値出す
             aveTime = aveTime / list.size();
             aveTrans = aveTrans / list.size();
             aveCost = aveCost / list.size();
-//            map.put("aveTime", Double.toString(aveTime));
+            // 計算した平均と詳細リストをモデルにセット
             displayModel.setAveTime(aveTime);
             displayModel.setAveTrans(aveTrans);
             displayModel.setAveCost(aveCost);
             displayModel.setDetailList(list);
-
-//            displayList.add(map);
+            // モデルをリストに追加
             displayList.add(displayModel);
-
-/*            Log.d("debug", map.get("title"));
-            Log.d("debug", map.get("aveTime"));*/
         }
         // 所要時間でソート
         Collections.sort(displayList, new Comparator<DisplayModel>() {
