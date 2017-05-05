@@ -7,6 +7,8 @@ public class SearchResultModel implements Serializable {
     private String stationNameFrom = null;
     private String stationNameTo = null;
     private String fastestTime = null;
+    private String transfer = null;
+    private String cost = null;
 
     public String getStationNameFrom() {
 
@@ -36,5 +38,25 @@ public class SearchResultModel implements Serializable {
     public void setFastestTime(String fastestTime) {
 
         this.fastestTime = fastestTime;
+    }
+
+    public String getTransfer() {
+
+        return this.transfer;
+    }
+
+    public void setTransfer(String transfer) {
+
+        this.transfer = transfer;
+    }
+
+    public String getCost() {
+
+        return this.cost;
+    }
+
+    public void setCost(String cost) {
+
+        this.cost = cost;
     }
 }

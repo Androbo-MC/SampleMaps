@@ -124,7 +124,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
                     dialog.dismiss();
 
                     new AlertDialog.Builder(MainActivity.this)
-                            .setTitle("検索結果取得が取得できません。")
+                            .setTitle("検索結果が取得できません。")
                             .setMessage("入力をやり直して下さい。")
                             .setPositiveButton("OK", new DialogInterface.OnClickListener() {
                                 @Override

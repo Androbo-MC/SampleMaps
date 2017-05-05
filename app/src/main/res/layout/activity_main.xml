@@ -14,7 +14,7 @@
         android:layout_alignLeft="@+id/editText2"
         android:layout_alignStart="@+id/editText2"
         android:ems="10"
-        android:hint="駅名や住所を入力"
+        android:hint="駅名を入力"
         android:inputType="textPersonName"
         android:selectAllOnFocus="false" />
 

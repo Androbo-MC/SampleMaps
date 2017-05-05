@@ -180,7 +180,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             // 中間地点に色違いのピンをセットして情報ウインドウも表示
             Marker centerMarker = mMap.addMarker(new MarkerOptions().position(centerLatLng)
                     .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_YELLOW))
-                    .title("Center HERE!"));
+                    .title("中間地点！"));
             centerMarker.showInfoWindow();
             mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(centerLatLng, zoomLevel));    //2～21で大きいほどズーム
             // 情報ウインドウのリスナーをセット
@@ -200,7 +200,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     public void onInfoWindowClick(Marker marker) {
         // 情報ウインドウがタップされた時の処理
         new AlertDialog.Builder(this)
-                .setTitle("周辺施設検索")
+                .setTitle("周辺駅検索")
                 .setMessage("この地点の周辺駅情報を表示しますか？")
                 .setPositiveButton("OK", new DialogInterface.OnClickListener() {
                     @Override
@@ -328,8 +328,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                                 dialog.show();
                                 // 入力した駅と中間地点周辺駅の所要時間等を取得する
                                 for (String selectedStation : selectedStationList) {
+                                    // Jorudan検索のために"駅"を削除
+                                    selectedStation = selectedStation.substring(0, selectedStation.length()-1);
 
                                     for (String inputStation : inputStationList) {
+                                        // Jorudan検索のために"駅"を削除
+                                        inputStation = inputStation.substring(0, inputStation.length()-1);
 
                                         getStationDetail(inputStation, selectedStation);
                                     }
@@ -358,8 +362,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
                 try {
                     Request request = new Request.Builder()
-                            .url("http://www.jorudan.co.jp/norikae/route/"
-                                    + inputStation + "_" + selectedStation + ".html")
+//                            .url("http://www.jorudan.co.jp/norikae/route/"
+//                                    + inputStation + "_" + selectedStation + ".html")
+                            .url("http://www.jorudan.co.jp/norikae/cgi/nori.cgi?Sok=決+定&eki1="
+                                    + inputStation + "&eki2=" + selectedStation)
                             .get()
                             .build();
 
@@ -370,6 +376,19 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
                 } catch (IOException e) {
                     e.printStackTrace();
+                    dialog.dismiss();
+
+                    new AlertDialog.Builder(MapsActivity.this)
+                            .setTitle("通信に失敗しました。")
+                            .setMessage("入力をやり直して下さい。")
+                            .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+
+                                }
+                            })
+                            .setCancelable(false)
+                            .show();
                 }
                 return result;
             }
@@ -388,13 +407,15 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 if (inputStation.equals(selectedStation)) {
                     model.setFastestTime("0分");
                 } else {
-                    // 取得したwebページから必要な所要時間情報を取得
+                    // 取得したwebページから必要な各情報を取得
                     Document doc = Jsoup.parse(result);
 /*                   Elements routeList = doc.getElementById("Bk_list_tbody").children();
                 for (Element route : routeList) {
                 Log.d("debug", route.child(2).text());
                 }*/
                     model.setFastestTime(doc.getElementById("Bk_list_tbody").child(0).child(2).text());
+                    model.setTransfer(doc.getElementById("Bk_list_tbody").child(0).child(3).text());
+                    model.setCost(doc.getElementById("Bk_list_tbody").child(0).child(4).text());
                 }
                 resultModelList.add(model);
 
@@ -406,14 +427,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 progressValue++;
                 dialog.setProgress(progressValue);
 
-                if (inputStation.equals(inputStationList.get(inputStationList.size()-1))) {
+                if ((inputStation + "駅").equals(inputStationList.get(inputStationList.size()-1))) {
                     // inputStationの区切りでいったん大元のリストに詰めてリセット
                     resultList.add(resultModelList);
                     resultModelList = new ArrayList<>();
                 }
                 // 全てのレスポンスが取得できたら画面遷移
-                if (inputStation.equals(inputStationList.get(inputStationList.size()-1))
-                        && selectedStation.equals(selectedStationList.get(selectedStationList.size()-1))) {
+                if ((inputStation + "駅").equals(inputStationList.get(inputStationList.size()-1))
+                        && (selectedStation + "駅").equals(selectedStationList.get(selectedStationList.size()-1))) {
 
                     Intent intent = new Intent(MapsActivity.this, DetailsActivity.class);
                     intent.putExtra("result", resultList);
