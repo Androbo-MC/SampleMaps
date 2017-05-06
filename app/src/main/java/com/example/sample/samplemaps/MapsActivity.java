@@ -329,11 +329,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                                 // 入力した駅と中間地点周辺駅の所要時間等を取得する
                                 for (String selectedStation : selectedStationList) {
                                     // Jorudan検索のために"駅"を削除
-                                    selectedStation = selectedStation.substring(0, selectedStation.length()-1);
+//                                        selectedStation = selectedStation.substring(0, selectedStation.length()-1);
 
                                     for (String inputStation : inputStationList) {
                                         // Jorudan検索のために"駅"を削除
-                                        inputStation = inputStation.substring(0, inputStation.length()-1);
+//                                        inputStation = inputStation.substring(0, inputStation.length()-1);
 
                                         getStationDetail(inputStation, selectedStation);
                                     }
@@ -427,14 +427,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 progressValue++;
                 dialog.setProgress(progressValue);
 
-                if ((inputStation + "駅").equals(inputStationList.get(inputStationList.size()-1))) {
+                if (inputStation.equals(inputStationList.get(inputStationList.size()-1))) {
                     // inputStationの区切りでいったん大元のリストに詰めてリセット
                     resultList.add(resultModelList);
                     resultModelList = new ArrayList<>();
                 }
                 // 全てのレスポンスが取得できたら画面遷移
-                if ((inputStation + "駅").equals(inputStationList.get(inputStationList.size()-1))
-                        && (selectedStation + "駅").equals(selectedStationList.get(selectedStationList.size()-1))) {
+                if (inputStation.equals(inputStationList.get(inputStationList.size()-1))
+                        && selectedStation.equals(selectedStationList.get(selectedStationList.size()-1))) {
 
                     Intent intent = new Intent(MapsActivity.this, DetailsActivity.class);
                     intent.putExtra("result", resultList);
