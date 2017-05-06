@@ -9,7 +9,11 @@ import android.widget.TextView;
 
 import java.util.ArrayList;
 
-// アダプターをカスタムする
+/**
+ * 自作アダプタークラス
+ *
+ * カスタムしたアダプターでリストビューの1行の内容を定義する。
+ */
 public class MyAdapter extends BaseAdapter {
     Context context;
     LayoutInflater myInflater;

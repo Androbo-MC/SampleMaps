@@ -23,6 +23,11 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * メインアクティビティクラス
+ *
+ * 内部的にはマップが先に呼ばれるが、実質はここが初期画面。
+ */
 public class MainActivity extends Activity implements View.OnClickListener {
 
     private ArrayList<String> latList = new ArrayList<>();
@@ -69,7 +74,13 @@ public class MainActivity extends Activity implements View.OnClickListener {
         }
     }
 
-    // 指定された駅の数だけリクエスト投げて場所を特定
+    /**
+     * 位置情報取得
+     *
+     * 指定された駅の数だけリクエスト投げて場所を特定する。
+     *
+     * @param searchText テキストボックスに入力された駅名
+     */
     private void getPlaceInfo(final String searchText) {
 
         // 1つめのリクエストを投げる時にくるくるを表示

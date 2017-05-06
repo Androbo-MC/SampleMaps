@@ -34,6 +34,11 @@ import java.util.List;
 
 import static com.example.sample.samplemaps.R.id.map;
 
+/**
+ * マップアクティビティクラス
+ *
+ * 入力された駅名の座標位置と中間地点の位置を示す。
+ */
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback,
         GoogleMap.OnInfoWindowClickListener {
 
@@ -350,7 +355,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         selectedStationList.clear();
     }
 
-    // 取得した駅名から詳細情報(所要時間等)を取得
+    /**
+     * 駅詳細情報取得
+     *
+     * 取得した駅名から詳細情報(所要時間等)を取得する。
+     *
+     * @param _inputStation 前画面で入力された駅名
+     * @param _selectedStation チェックボックスで選択された駅名
+     */
     private void getStationDetail(final String _inputStation, final String _selectedStation) {
 
         new AsyncTask<Void, Void, String>() {          //登録処理は非同期で

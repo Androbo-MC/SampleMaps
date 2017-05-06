@@ -7,6 +7,11 @@ import android.widget.TextView;
 
 import java.util.ArrayList;
 
+/**
+ * 詳細アクティビティクラス
+ *
+ * リストビュー表示された情報から、各到着駅に関する詳細情報を表示する。
+ */
 public class DetailActivity extends Activity {
 
     @Override

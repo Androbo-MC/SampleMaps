@@ -3,6 +3,11 @@ package com.example.sample.samplemaps;
 import java.io.Serializable;
 import java.util.ArrayList;
 
+/**
+ * 画面表示モデルクラス
+ *
+ * リストビューに表示する1行分の情報を格納する。
+ */
 public class DisplayModel implements Serializable {
 
     private ArrayList<SearchResultModel> detailList = null;

@@ -12,6 +12,11 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 
+/**
+ * リストアクティビティクラス
+ *
+ * 取得された所要時間等の詳細情報をリストビュー表示する。
+ */
 public class ListActivity extends Activity implements AdapterView.OnItemClickListener {
 
     private ArrayList<DisplayModel> displayList = new ArrayList<>();
