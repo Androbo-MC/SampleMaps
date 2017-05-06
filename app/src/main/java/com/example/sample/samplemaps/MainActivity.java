@@ -140,12 +140,11 @@ public class MainActivity extends Activity implements View.OnClickListener {
 
                 // 全てのレスポンスが取得できたらMAPへ画面遷移
                 if (counter == latList.size() && counter == lngList.size()){
-
-                    Intent intent = new Intent(MainActivity.this, MapsActivity.class);
                     // 取得した緯度経度を渡す
-                    intent.putStringArrayListExtra("latitude", latList);
-                    intent.putStringArrayListExtra("longitude", lngList);
-                    intent.putStringArrayListExtra("inputStationList", inputStationList);
+                    Intent intent = new Intent(MainActivity.this, MapsActivity.class)
+                            .putStringArrayListExtra("latitude", latList)
+                            .putStringArrayListExtra("longitude", lngList)
+                            .putStringArrayListExtra("inputStationList", inputStationList);
                     startActivity(intent);
                     // 各リストを初期化
                     latList.clear();

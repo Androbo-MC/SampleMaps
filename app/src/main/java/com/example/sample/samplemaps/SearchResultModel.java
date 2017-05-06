@@ -4,11 +4,11 @@ import java.io.Serializable;
 
 public class SearchResultModel implements Serializable {
 
-    private String stationNameFrom = null;
-    private String stationNameTo = null;
-    private String fastestTime = null;
-    private String transfer = null;
-    private String cost = null;
+    private String stationNameFrom = "";
+    private String stationNameTo = "";
+    private String fastestTime = "";
+    private String transfer = "";
+    private String cost = "";
 
     public String getStationNameFrom() {
 

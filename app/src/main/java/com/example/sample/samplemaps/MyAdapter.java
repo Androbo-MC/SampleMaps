@@ -45,13 +45,15 @@ public class MyAdapter extends BaseAdapter {
             convertView = myInflater.inflate(R.layout.listview_row, parent, false);
         }
         // 各テキストをレイアウトと繋ぐ
-        TextView message = (TextView) convertView.findViewById(R.id.title);
-        message.setText(list.get(position).getTitle());
-        TextView time = (TextView) convertView.findViewById(R.id.ave_time);
+        TextView title = (TextView) convertView.findViewById(R.id.title);
+        title.setText(list.get(position).getTitle());
+        TextView aveTime = (TextView) convertView.findViewById(R.id.ave_time);
         // 小数点第1位で四捨五入して表示
-        time.setText("平均所要時間 " + String.format("%.1f", list.get(position).getAveTime()) + "分");
-        TextView read = (TextView) convertView.findViewById(R.id.ave_trans);
-        read.setText("平均乗換回数 " + String.format("%.1f", list.get(position).getAveTrans()) + "回");
+        aveTime.setText("平均所要時間 " + String.format("%.1f", list.get(position).getAveTime()) + "分");
+        TextView aveTrans = (TextView) convertView.findViewById(R.id.ave_trans);
+        aveTrans.setText("平均乗換回数 " + String.format("%.1f", list.get(position).getAveTrans()) + "回");
+        TextView aveCost = (TextView) convertView.findViewById(R.id.ave_cost);
+        aveCost.setText("平均乗車運賃 " + String.format("%.1f", list.get(position).getAveCost()) + "円");
 
         return convertView;
     }

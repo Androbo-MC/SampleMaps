@@ -351,7 +351,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
     // 取得した駅名から詳細情報(所要時間等)を取得
-    private void getStationDetail(final String inputStation, final String selectedStation) {
+    private void getStationDetail(final String _inputStation, final String _selectedStation) {
 
         new AsyncTask<Void, Void, String>() {          //登録処理は非同期で
 
@@ -359,7 +359,15 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             protected String doInBackground(Void... params) {
 
                 String result = null;
-
+                String inputStation = _inputStation;
+                String selectedStation = _selectedStation;
+                // 大手町駅が愛媛になってしまう事への対応
+                if (inputStation.equals("大手町駅")) {
+                    inputStation = "大手町";
+                }
+                if (selectedStation.equals("大手町駅")) {
+                    selectedStation = "大手町";
+                }
                 try {
                     Request request = new Request.Builder()
 //                            .url("http://www.jorudan.co.jp/norikae/route/"
@@ -397,15 +405,17 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             @Override
             protected void onPostExecute(String result) {
 
-                Log.d("debug", inputStation + selectedStation);
+                Log.d("debug", _inputStation + _selectedStation);
 
                 SearchResultModel model = new SearchResultModel();
-                model.setStationNameFrom(inputStation);
-                model.setStationNameTo(selectedStation);
+                model.setStationNameFrom(_inputStation);
+                model.setStationNameTo(_selectedStation);
 
                 // 入力駅 == 候補駅だった時は所要時間0分
-                if (inputStation.equals(selectedStation)) {
+                if (_inputStation.equals(_selectedStation)) {
                     model.setFastestTime("0分");
+                    model.setTransfer("乗換 0回");
+                    model.setCost("0円");
                 } else {
                     // 取得したwebページから必要な各情報を取得
                     Document doc = Jsoup.parse(result);
@@ -413,9 +423,17 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 for (Element route : routeList) {
                 Log.d("debug", route.child(2).text());
                 }*/
-                    model.setFastestTime(doc.getElementById("Bk_list_tbody").child(0).child(2).text());
-                    model.setTransfer(doc.getElementById("Bk_list_tbody").child(0).child(3).text());
-                    model.setCost(doc.getElementById("Bk_list_tbody").child(0).child(4).text());
+                    // 例外的に対応する必要のあるケースを先に処理
+                    // ・近すぎる検索(例：有楽町～日比谷)
+                    if (doc.getElementById("search_msg").text().equals("検索できない駅の指定です。（近距離です。）")) {
+                        model.setFastestTime("0分");
+                        model.setTransfer("乗換 0回");
+                        model.setCost("0円");
+                    } else {
+                        model.setFastestTime(doc.getElementById("Bk_list_tbody").child(0).child(2).text());
+                        model.setTransfer(doc.getElementById("Bk_list_tbody").child(0).child(3).text());
+                        model.setCost(doc.getElementById("Bk_list_tbody").child(0).child(4).text());
+                    }
                 }
                 resultModelList.add(model);
 
@@ -427,17 +445,17 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 progressValue++;
                 dialog.setProgress(progressValue);
 
-                if (inputStation.equals(inputStationList.get(inputStationList.size()-1))) {
+                if (_inputStation.equals(inputStationList.get(inputStationList.size()-1))) {
                     // inputStationの区切りでいったん大元のリストに詰めてリセット
                     resultList.add(resultModelList);
                     resultModelList = new ArrayList<>();
                 }
                 // 全てのレスポンスが取得できたら画面遷移
-                if (inputStation.equals(inputStationList.get(inputStationList.size()-1))
-                        && selectedStation.equals(selectedStationList.get(selectedStationList.size()-1))) {
+                if (_inputStation.equals(inputStationList.get(inputStationList.size()-1))
+                        && _selectedStation.equals(selectedStationList.get(selectedStationList.size()-1))) {
 
-                    Intent intent = new Intent(MapsActivity.this, DetailsActivity.class);
-                    intent.putExtra("result", resultList);
+                    Intent intent = new Intent(MapsActivity.this, ListActivity.class)
+                            .putExtra("result", resultList);
                     startActivity(intent);
 
                     Log.d("debug", "最後");

@@ -12,7 +12,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 
-public class DetailsActivity extends Activity implements AdapterView.OnItemClickListener {
+public class ListActivity extends Activity implements AdapterView.OnItemClickListener {
 
     private ArrayList<DisplayModel> displayList = new ArrayList<>();
     private ListView listview;
@@ -23,7 +23,7 @@ public class DetailsActivity extends Activity implements AdapterView.OnItemClick
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_details);
+        setContentView(R.layout.activity_list);
 
         Intent intent = getIntent();
         ArrayList<ArrayList<SearchResultModel>> resultList =
@@ -103,6 +103,9 @@ public class DetailsActivity extends Activity implements AdapterView.OnItemClick
         FVP = listview.getFirstVisiblePosition();
         y = listview.getChildAt(0).getTop();
 
-        // 詳細画面への遷移(これからやる)
+        // 詳細画面への遷移
+        Intent intent = new Intent(this, DetailActivity.class)
+                .putExtra("displayModel", displayList.get(position));
+        startActivity(intent);
     }
 }
