@@ -4,7 +4,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 
 /**
- * 画面表示モデルクラス
+ * 画面表示モデル
  *
  * リストビューに表示する1行分の情報を格納する。
  */

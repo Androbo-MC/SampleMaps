@@ -21,10 +21,9 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.List;
 
 /**
- * メインアクティビティクラス
+ * メインアクティビティ
  *
  * 内部的にはマップが先に呼ばれるが、実質はここが初期画面。
  */

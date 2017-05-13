@@ -10,7 +10,7 @@ import android.widget.TextView;
 import java.util.ArrayList;
 
 /**
- * 自作アダプタークラス
+ * 自作アダプター
  *
  * カスタムしたアダプターでリストビューの1行の内容を定義する。
  */

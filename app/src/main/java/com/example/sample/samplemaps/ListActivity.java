@@ -13,7 +13,7 @@ import java.util.Collections;
 import java.util.Comparator;
 
 /**
- * リストアクティビティクラス
+ * リストアクティビティ
  *
  * 取得された所要時間等の詳細情報をリストビュー表示する。
  */

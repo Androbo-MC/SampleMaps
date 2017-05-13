@@ -35,7 +35,7 @@ import java.util.List;
 import static com.example.sample.samplemaps.R.id.map;
 
 /**
- * マップアクティビティクラス
+ * マップアクティビティ
  *
  * 入力された駅名の座標位置と中間地点の位置を示す。
  */
@@ -324,7 +324,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                                 }
                                 // プログレスバーで進捗を表示
                                 dialog = new ProgressDialog(MapsActivity.this);
-                                dialog.setTitle("所要時間を検索中");
+                                dialog.setTitle("詳細情報を検索中");
                                 dialog.setMessage("しばらくお待ち下さい...");
                                 dialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
                                 dialog.setCancelable(false);
@@ -373,12 +373,20 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 String result = null;
                 String inputStation = _inputStation;
                 String selectedStation = _selectedStation;
-                // 大手町駅が愛媛になってしまう事への対応
+                // 駅名が意図しない場所を示すケースを調整
+                // 大手町駅が愛媛県の大手町駅前になってしまう→"大手町"とすることで東京と認識
                 if (inputStation.equals("大手町駅")) {
                     inputStation = "大手町";
                 }
                 if (selectedStation.equals("大手町駅")) {
                     selectedStation = "大手町";
+                }
+                // 高津駅が京都の高津駅になってしまう→"高津駅（神奈川）"とする
+                if (inputStation.equals("高津駅") || inputStation.equals("高津")) {
+                    inputStation = "高津駅（神奈川）";
+                }
+                if (selectedStation.equals("高津駅")) {
+                    selectedStation = "高津駅（神奈川）";
                 }
                 try {
                     Request request = new Request.Builder()

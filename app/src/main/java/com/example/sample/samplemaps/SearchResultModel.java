@@ -3,7 +3,7 @@ package com.example.sample.samplemaps;
 import java.io.Serializable;
 
 /**
- * 検索結果モデルクラス
+ * 検索結果モデル
  *
  * Jorudan検索した詳細情報を格納する。
  */
