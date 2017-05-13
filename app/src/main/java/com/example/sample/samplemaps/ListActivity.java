@@ -46,10 +46,15 @@ public class ListActivity extends Activity implements AdapterView.OnItemClickLis
 
             for (SearchResultModel model : list) {
 
-                if (model.getFastestTime().contains("時間")) {
+                if (model.getFastestTime().indexOf("時間") == 1) {
                     // 1時間以上かかる場合の処理
                     aveTime += Integer.parseInt(model.getFastestTime().substring(0, 1)) * 60;
                     aveTime += Integer.parseInt(model.getFastestTime().substring(3, model.getFastestTime().length()-1));
+                    Log.d("debug", Double.toString(aveTime));
+                } else if (model.getFastestTime().indexOf("時間") == 2) {
+                    // 10時間以上かかる場合の処理
+                    aveTime += Integer.parseInt(model.getFastestTime().substring(0, 2)) * 60;
+                    aveTime += Integer.parseInt(model.getFastestTime().substring(4, model.getFastestTime().length()-1));
                     Log.d("debug", Double.toString(aveTime));
                 } else {
                     // "分"を削除して数値型にして足す
@@ -93,7 +98,7 @@ public class ListActivity extends Activity implements AdapterView.OnItemClickLis
         }
         // ここからリストビュー表示の処理やる
         //AdapterでListの配列をListViewへ
-        listview = (ListView) findViewById(R.id.ListView);
+        listview = (ListView) findViewById(R.id.list_view);
         myadapter = new MyAdapter(this, displayList);
         listview.setAdapter(myadapter);
         listview.setSelectionFromTop(FVP, y);       // 記憶してあったリストの位置を取得

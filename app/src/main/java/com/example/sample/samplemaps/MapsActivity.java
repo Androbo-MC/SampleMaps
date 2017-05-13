@@ -31,6 +31,7 @@ import org.jsoup.nodes.Document;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.TreeSet;
 
 import static com.example.sample.samplemaps.R.id.map;
 
@@ -40,7 +41,7 @@ import static com.example.sample.samplemaps.R.id.map;
  * 入力された駅名の座標位置と中間地点の位置を示す。
  */
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback,
-        GoogleMap.OnInfoWindowClickListener {
+        GoogleMap.OnInfoWindowClickListener, GoogleMap.OnMarkerDragListener {
 
     private ArrayList<Double> latList = new ArrayList<>();
     private ArrayList<Double> lngList = new ArrayList<>();
@@ -185,11 +186,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             // 中間地点に色違いのピンをセットして情報ウインドウも表示
             Marker centerMarker = mMap.addMarker(new MarkerOptions().position(centerLatLng)
                     .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_YELLOW))
+                    .draggable(true)
                     .title("中間地点！"));
             centerMarker.showInfoWindow();
             mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(centerLatLng, zoomLevel));    //2～21で大きいほどズーム
             // 情報ウインドウのリスナーをセット
             mMap.setOnInfoWindowClickListener(this);
+            // ドラッグのリスナーをセット
+            mMap.setOnMarkerDragListener(this);
         }
     }
 
@@ -199,6 +203,20 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         if (e.getAction() == KeyEvent.ACTION_UP && e.getKeyCode() == KeyEvent.KEYCODE_BACK) { //バックボタンが離された時
         }
         return super.dispatchKeyEvent(e);
+    }
+
+    @Override
+    public void onMarkerDragStart(Marker marker) {
+    }
+
+    @Override
+    public void onMarkerDrag(Marker marker) {
+    }
+
+    @Override
+    public void onMarkerDragEnd(Marker marker) {
+        // ドラッグが終わったら中間地点の座標をずらす
+        centerLatLng = marker.getPosition();
     }
 
     @Override
@@ -233,7 +251,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         dialog.setCancelable(false);
         dialog.show();
 
-        new AsyncTask<Void, Void, String>() {          //登録処理は非同期で
+        new AsyncTask<Void, Void, String>() {          // 登録処理は非同期で
             @Override
             protected String doInBackground(Void... params) {
 
@@ -312,12 +330,15 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                         new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface d, int which) {
                                 // OKボタンクリック処理
+                                TreeSet<String> set = new TreeSet<>();
                                 for (int i = 0; i < chkItems.length; i++) {
                                     // チェックが入っていた駅名を選択済リストに詰める
                                     if (chkSts[i]) {
-                                        selectedStationList.add(chkItems[i]);
+                                        set.add(chkItems[i]);
                                     }
                                 }
+                                // 重複を除いたsetからArrayListに変換
+                                selectedStationList = new ArrayList<>(set);
                                 if (selectedStationList.size() == 0) {
                                     // チェックが何もなかったら何もしない
                                     return;

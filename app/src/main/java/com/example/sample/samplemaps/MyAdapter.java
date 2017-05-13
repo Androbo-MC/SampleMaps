@@ -8,6 +8,7 @@ import android.widget.BaseAdapter;
 import android.widget.TextView;
 
 import java.util.ArrayList;
+import java.util.Locale;
 
 /**
  * 自作アダプター
@@ -15,9 +16,10 @@ import java.util.ArrayList;
  * カスタムしたアダプターでリストビューの1行の内容を定義する。
  */
 public class MyAdapter extends BaseAdapter {
-    Context context;
-    LayoutInflater myInflater;
-    ArrayList<DisplayModel> list;
+
+    private Context context;
+    private LayoutInflater myInflater;
+    private ArrayList<DisplayModel> list;
 
     // コンストラクタでnew時に呼ばれる処理を書いとく
     public MyAdapter(Context context, ArrayList<DisplayModel> list) {
@@ -48,16 +50,11 @@ public class MyAdapter extends BaseAdapter {
         if (convertView == null) {
             convertView = myInflater.inflate(R.layout.listview_row, parent, false);
         }
-        // 各テキストをレイアウトと繋ぐ
-        TextView title = (TextView) convertView.findViewById(R.id.title);
-        title.setText(list.get(position).getTitle());
-        TextView aveTime = (TextView) convertView.findViewById(R.id.ave_time);
         // 小数点第1位で四捨五入して表示
-        aveTime.setText("平均所要時間 " + String.format("%.1f", list.get(position).getAveTime()) + "分");
-        TextView aveTrans = (TextView) convertView.findViewById(R.id.ave_trans);
-        aveTrans.setText("平均乗換回数 " + String.format("%.1f", list.get(position).getAveTrans()) + "回");
-        TextView aveCost = (TextView) convertView.findViewById(R.id.ave_cost);
-        aveCost.setText("平均乗車運賃 " + String.format("%.1f", list.get(position).getAveCost()) + "円");
+        TextView listViewRow = (TextView) convertView.findViewById(R.id.list_view_row);
+        listViewRow.setText("平均所要時間 " + String.format(Locale.US, "%.1f", list.get(position).getAveTime()) + "分\n"
+                + "平均乗換回数 " + String.format(Locale.US, "%.1f", list.get(position).getAveTrans()) + "回\n"
+                + "平均乗車運賃 " + String.format(Locale.US, "%.1f", list.get(position).getAveCost()) + "円\n");
 
         return convertView;
     }

@@ -5,40 +5,9 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="New Text"
-        android:id="@+id/title"
+        android:id="@+id/list_view_row"
         android:layout_alignParentTop="true"
         android:layout_alignParentLeft="true"
         android:textColor="#111" />
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="New Text"
-        android:id="@+id/ave_time"
-        android:textColor="#111"
-        android:layout_below="@+id/title"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true" />
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="New Text"
-        android:id="@+id/ave_trans"
-        android:textColor="#111"
-        android:layout_below="@+id/ave_time"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true" />
-
-    <TextView
-        android:id="@+id/ave_cost"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="New Text"
-        android:textColor="#111"
-        android:layout_below="@+id/ave_trans"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true" />
 
 </RelativeLayout>
