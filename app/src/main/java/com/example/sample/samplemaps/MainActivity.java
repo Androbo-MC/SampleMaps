@@ -7,10 +7,14 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.text.InputType;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.RelativeLayout;
 
 import com.squareup.okhttp.OkHttpClient;
 import com.squareup.okhttp.Request;
@@ -34,30 +38,60 @@ public class MainActivity extends Activity implements View.OnClickListener {
     private ArrayList<EditText> textBoxList = new ArrayList<>();
     private ArrayList<String> inputStationList = new ArrayList<>();
     private int counter = 0;
+    private int viewCounter = 1;
     private ProgressDialog dialog = null;
+    private final int WC = ViewGroup.LayoutParams.WRAP_CONTENT;
 
     /** Called when the activity is first created. */
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        // カウンター初期化
+        counter = 0;
+        viewCounter = 1;
+        // 入力されたテキストボックスを取得
+        textBoxList.add((EditText) findViewById(R.id.edit_text1));
 
         // buttonを取得
-        Button btn = (Button)findViewById(R.id.Button01);
+        Button btn = (Button)findViewById(R.id.button1);
         btn.setOnClickListener(this);
+    }
+
+    // テキストエリア追加用の＋ボタンが押されたら呼ばれる
+    public void addTextView(View v) {
+        // ビューの親となるレイアウトを取得
+        RelativeLayout layout = (RelativeLayout) findViewById(R.id.activity_main_layout);
+        // ひとつ前のテキストエリアからヒントを削除
+        textBoxList.get(textBoxList.size()-1).setHint("");
+        // テキストエリアを動的に生成
+        EditText editText = new EditText(this);
+        editText.setHint("駅名を入力");
+        editText.setEms(10);
+        editText.setInputType(InputType.TYPE_CLASS_TEXT);
+        editText.setId(viewCounter);
+        RelativeLayout.LayoutParams param = new RelativeLayout.LayoutParams(WC, WC);
+        // 1回目だけは静的なIDを参照する。
+        if (viewCounter == 1) {
+            param.addRule(RelativeLayout.BELOW, getResources().getIdentifier(
+                    "edit_text" + Integer.toString(textBoxList.size()), "id", getPackageName()));
+            param.addRule(RelativeLayout.ALIGN_LEFT, getResources().getIdentifier(
+                    "edit_text" + Integer.toString(textBoxList.size()), "id", getPackageName()));
+        } else {
+            // こいつの第二引数が0だとルール削除の意味になるようなので、カウンターは1から開始
+            param.addRule(RelativeLayout.BELOW, viewCounter-1);
+            param.addRule(RelativeLayout.ALIGN_LEFT, viewCounter-1);
+        }
+        layout.addView(editText, param);
+        textBoxList.add(editText);
+        viewCounter++;
     }
 
     public void onClick(View v) {
 
-        // 入力されたテキストボックスを取得
-        textBoxList.add((EditText) findViewById(R.id.editText1));
-        textBoxList.add((EditText) findViewById(R.id.editText2));
-        textBoxList.add((EditText) findViewById(R.id.editText3));
-        textBoxList.add((EditText) findViewById(R.id.editText4));
-        textBoxList.add((EditText) findViewById(R.id.editText5));
         // 文字列のリストに詰める
         for (EditText text : textBoxList) {
-
+            // 空のテキストエリアは含まない
             if (!text.getText().toString().isEmpty()) {
 
                 inputStationList.add(text.getText().toString());

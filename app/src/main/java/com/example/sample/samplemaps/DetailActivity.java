@@ -27,7 +27,7 @@ public class DetailActivity extends Activity {
         Intent intent = getIntent();
         DisplayModel displayModel = (DisplayModel)intent.getSerializableExtra("displayModel");
         // 詳細リストの要素数分、テキストビューを作成
-        int i = 0;
+        int i = 1;
         for (SearchResultModel model : displayModel.getDetailList()) {
 
             TextView textView = new TextView(this);
@@ -40,16 +40,17 @@ public class DetailActivity extends Activity {
             textView.setTextColor(Color.BLACK);
             RelativeLayout.LayoutParams param = new RelativeLayout.LayoutParams(WC, WC);
             // 最初の1回だけは親に沿うようにする。
-            if (i == 0) {
+            if (i == 1) {
                 param.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
                 param.addRule(RelativeLayout.ALIGN_PARENT_TOP);
             } else {
+                // こいつの第二引数が0だとルール削除の意味になるようなので、カウンターは1から開始
                 param.addRule(RelativeLayout.BELOW, i-1);
             }
             layout.addView(textView, param);
             i++;
             // なぜか1つめと2つめが重なってしまうので、空のビューを挟む
-            if (i == 1) {
+/*            if (i == 1) {
                 textView = new TextView(this);
                 textView.setText("\n\n\n\n");
                 textView.setId(i);
@@ -57,7 +58,7 @@ public class DetailActivity extends Activity {
                 param.addRule(RelativeLayout.BELOW, i-1);
                 layout.addView(textView, param);
                 i++;
-            }
+            }*/
         }
     }
 }

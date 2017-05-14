@@ -52,7 +52,8 @@ public class MyAdapter extends BaseAdapter {
         }
         // 小数点第1位で四捨五入して表示
         TextView listViewRow = (TextView) convertView.findViewById(R.id.list_view_row);
-        listViewRow.setText("平均所要時間 " + String.format(Locale.US, "%.1f", list.get(position).getAveTime()) + "分\n"
+        listViewRow.setText(list.get(position).getTitle() + "\n"
+                + "平均所要時間 " + String.format(Locale.US, "%.1f", list.get(position).getAveTime()) + "分\n"
                 + "平均乗換回数 " + String.format(Locale.US, "%.1f", list.get(position).getAveTrans()) + "回\n"
                 + "平均乗車運賃 " + String.format(Locale.US, "%.1f", list.get(position).getAveCost()) + "円\n");
 
