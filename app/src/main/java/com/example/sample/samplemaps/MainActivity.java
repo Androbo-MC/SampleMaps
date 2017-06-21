@@ -49,7 +49,6 @@ public class MainActivity extends Activity implements View.OnClickListener {
         setContentView(R.layout.activity_main);
         // カウンター初期化
         counter = 0;
-        viewCounter = 1;
         // 入力されたテキストボックスを取得
         textBoxList.add((EditText) findViewById(R.id.edit_text1));
 
@@ -194,7 +193,6 @@ public class MainActivity extends Activity implements View.OnClickListener {
                     latList.clear();
                     lngList.clear();
                     inputStationList.clear();
-                    textBoxList.clear();
                     counter = 0;
                     // くるくるを消去
                     dialog.dismiss();
