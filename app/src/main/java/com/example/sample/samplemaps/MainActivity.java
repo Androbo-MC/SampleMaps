@@ -15,6 +15,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.RelativeLayout;
+import android.widget.Toast;
 
 import com.squareup.okhttp.OkHttpClient;
 import com.squareup.okhttp.Request;
@@ -38,7 +39,6 @@ public class MainActivity extends Activity implements View.OnClickListener {
     private ArrayList<EditText> textBoxList = new ArrayList<>();
     private ArrayList<String> inputStationList = new ArrayList<>();
     private int counter = 0;
-    private int viewCounter = 1;
     private ProgressDialog dialog = null;
     private final int WC = ViewGroup.LayoutParams.WRAP_CONTENT;
 
@@ -51,7 +51,6 @@ public class MainActivity extends Activity implements View.OnClickListener {
         counter = 0;
         // 入力されたテキストボックスを取得
         textBoxList.add((EditText) findViewById(R.id.edit_text1));
-
         // buttonを取得
         Button btn = (Button)findViewById(R.id.button1);
         btn.setOnClickListener(this);
@@ -59,6 +58,18 @@ public class MainActivity extends Activity implements View.OnClickListener {
 
     // テキストエリア追加用の＋ボタンが押されたら呼ばれる
     public void addTextView(View v) {
+
+        // テキストエリアの最大数だったら何もしないでメッセージだけ表示
+        if (textBoxList.size() >= 20) {
+            Toast.makeText(this, "入力駅は最大で20です", Toast.LENGTH_LONG).show();
+            return;
+        }
+        // 現在一番下にあるテキストエリアのIDを取得
+        int currentId = getResources().getIdentifier(
+                "edit_text" + Integer.toString(textBoxList.size()), "id", getPackageName());
+        // 今回生成するテキストエリアのIDを取得
+        int nextId = getResources().getIdentifier(
+                "edit_text" + Integer.toString(textBoxList.size()+1), "id", getPackageName());
         // ビューの親となるレイアウトを取得
         RelativeLayout layout = (RelativeLayout) findViewById(R.id.activity_main_layout);
         // ひとつ前のテキストエリアからヒントを削除
@@ -66,24 +77,23 @@ public class MainActivity extends Activity implements View.OnClickListener {
         // テキストエリアを動的に生成
         EditText editText = new EditText(this);
         editText.setHint("駅名を入力");
+        // 各設定を一つ目のテキストエリアと合わせる
         editText.setEms(10);
         editText.setInputType(InputType.TYPE_CLASS_TEXT);
-        editText.setId(viewCounter);
+        // IDを"edit_text〇"で次の番号に指定
+        editText.setId(nextId);
+        // 新しいテキストエリアにフォーカスを当てる
+        editText.requestFocus();
+        // パラメータ設定の作成
         RelativeLayout.LayoutParams param = new RelativeLayout.LayoutParams(WC, WC);
-        // 1回目だけは静的なIDを参照する。
-        if (viewCounter == 1) {
-            param.addRule(RelativeLayout.BELOW, getResources().getIdentifier(
-                    "edit_text" + Integer.toString(textBoxList.size()), "id", getPackageName()));
-            param.addRule(RelativeLayout.ALIGN_LEFT, getResources().getIdentifier(
-                    "edit_text" + Integer.toString(textBoxList.size()), "id", getPackageName()));
-        } else {
-            // こいつの第二引数が0だとルール削除の意味になるようなので、カウンターは1から開始
-            param.addRule(RelativeLayout.BELOW, viewCounter-1);
-            param.addRule(RelativeLayout.ALIGN_LEFT, viewCounter-1);
-        }
+        // 一つ前のテキストエリアの下に位置指定
+        param.addRule(RelativeLayout.BELOW, currentId);
+        // 一つ前のテキストエリアと左揃えの位置指定
+        param.addRule(RelativeLayout.ALIGN_LEFT, currentId);
+        // パラメータ設定を適用してビューをレイアウトに追加
         layout.addView(editText, param);
+        // 作成したテキストエリアを処理用のリストにも格納
         textBoxList.add(editText);
-        viewCounter++;
     }
 
     public void onClick(View v) {
@@ -143,6 +153,21 @@ public class MainActivity extends Activity implements View.OnClickListener {
                     result = response.body().string();
 
                 } catch (IOException e) {
+
+                    dialog.dismiss();
+                    new AlertDialog.Builder(MainActivity.this)
+                            .setTitle("検索結果が取得できません。")
+                            .setMessage("入力をやり直して下さい。")
+                            .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+
+                                    // ほんとは終了じゃなくて再描画的にしたい
+                                    finish();
+                                }
+                            })
+                            .setCancelable(false)
+                            .show();
                     e.printStackTrace();
                 }
                 return result;
@@ -163,9 +188,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
 
                 } catch(JSONException e) {
 
-                    e.printStackTrace();
                     dialog.dismiss();
-
                     new AlertDialog.Builder(MainActivity.this)
                             .setTitle("検索結果が取得できません。")
                             .setMessage("入力をやり直して下さい。")
@@ -179,6 +202,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
                             })
                             .setCancelable(false)
                             .show();
+                    e.printStackTrace();
                 }
 
                 // 全てのレスポンスが取得できたらMAPへ画面遷移

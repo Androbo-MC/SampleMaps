@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- あとから追加されるテキストエリアのIDを採番 -->
+    <item name="edit_text2" type="id"/>
+    <item name="edit_text3" type="id"/>
+    <item name="edit_text4" type="id"/>
+    <item name="edit_text5" type="id"/>
+    <item name="edit_text6" type="id"/>
+    <item name="edit_text7" type="id"/>
+    <item name="edit_text8" type="id"/>
+    <item name="edit_text9" type="id"/>
+    <item name="edit_text10" type="id"/>
+    <item name="edit_text11" type="id"/>
+    <item name="edit_text12" type="id"/>
+    <item name="edit_text13" type="id"/>
+    <item name="edit_text14" type="id"/>
+    <item name="edit_text15" type="id"/>
+    <item name="edit_text16" type="id"/>
+    <item name="edit_text17" type="id"/>
+    <item name="edit_text18" type="id"/>
+    <item name="edit_text19" type="id"/>
+    <item name="edit_text20" type="id"/>
+</resources>
