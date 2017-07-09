@@ -2,27 +2,28 @@
 <ScrollView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    tools:context="com.example.sample.samplemaps.MainActivity"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fillViewport="true">
 
     <RelativeLayout
+
         android:id="@+id/activity_main_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        tools:context="com.example.sample.samplemaps.MainActivity">
+        android:orientation="vertical">
 
-        <EditText
-            android:id="@+id/edit_text1"
+        <TextView
+            android:id="@+id/textView3"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_above="@+id/button1"
             android:layout_centerHorizontal="true"
-            android:layout_centerVertical="true"
-            android:ems="10"
-            android:hint="駅名を入力"
-            android:inputType="text"
-            android:selectAllOnFocus="false" />
+            android:layout_marginBottom="50dp"
+            android:text="中間地点アプリ"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:textColor="#111" />
 
         <Button
             android:id="@+id/button1"
@@ -43,16 +44,16 @@
             android:onClick="addTextView"
             android:text="追加！" />
 
-        <TextView
-            android:id="@+id/textView3"
+        <EditText
+            android:id="@+id/edit_text1"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignParentTop="true"
             android:layout_centerHorizontal="true"
-            android:layout_marginTop="80dp"
-            android:text="中間地点アプリ"
-            android:textColor="#111"
-            android:textAppearance="?android:attr/textAppearanceLarge"/>
+            android:layout_centerVertical="true"
+            android:ems="10"
+            android:hint="駅名を入力"
+            android:inputType="text"
+            android:selectAllOnFocus="false"/>
 
     </RelativeLayout>
 </ScrollView>
